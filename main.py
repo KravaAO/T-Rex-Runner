@@ -1,8 +1,9 @@
 from pygame import *
 import time as t
+import random
 
 init()
-
+font.init()
 
 class GameSprite:
     def __init__(self, img_list, x, y, width, height):
@@ -24,17 +25,26 @@ class GameSprite:
         draw.rect(window, (250, 0, 0), self.rect, 5, 5)
 
 class Enemy(GameSprite):
+    def random_group(self):
+        pass
+
     def update(self):
         pass
 
+img_reset = transform.scale(image.load('img/reset.png'), (80, 50))
 
-cactus = Enemy(['img/cactus.png'], 900, 360, 60, 80)
-
+cactuses = list()
+cactus_l = Enemy(['img/cactus.png'], random.randint(900, 1090), 360, 60, 80)
+cactus_b = Enemy(['img/cactus_big.png'], random.randint(1100, 1300), 340, 70, 100)
+cactuses.append(cactus_l)
+cactuses.append(cactus_b)
 
 size = (800, 500)
 window = display.set_mode(size)
 display.set_caption('dino')
 clock = time.Clock()
+
+font1 = font.Font('NFPixels-Regular.otf', 30)
 
 
 dino_frames = ['img/dino_run_1.png', 'img/dino_run_2.png']
@@ -56,6 +66,9 @@ start_time = t.time()
 is_jump = False
 start_jump = 0
 finish = False
+dino.rect.width -= 40
+score = 0
+hight_score = 0
 while game:
     for e in event.get():
         if e.type == QUIT:
@@ -64,9 +77,20 @@ while game:
             if e.key == K_SPACE and not is_jump:
                 is_jump = True
                 start_jump = t.time()
-    if not finish:
-        window.fill((250, 250, 250))
+        if e.type == MOUSEBUTTONDOWN and finish:
+            score = 0
+            cactuses = list()
+            cactus_l = Enemy(['img/cactus.png'], random.randint(900, 1090), 360, 60, 80)
+            cactus_b = Enemy(['img/cactus_big.png'], random.randint(1100, 1300), 340, 70, 100)
+            cactuses.append(cactus_l)
+            cactuses.append(cactus_b)
+            dino = GameSprite(dino_frames, 100, 350, 100, 100)
+            finish = False
 
+    if not finish:
+        text = font1.render(f'HI{int(hight_score)} {int(score)}', True, (0, 0, 0))
+        window.fill((250, 250, 250))
+        window.blit(text, (630, 40))
         floor1_rect.x -= 8
         floor2_rect.x -= 8
         floor3_rect.x -= 8
@@ -81,14 +105,14 @@ while game:
             floor3_rect.x = 800
 
         if is_jump:
-            dino.rect.y -= 5
+            dino.rect.y -= 8
         new_time = t.time()
 
         if new_time - start_jump > 0.5:
             is_jump = False
 
         if dino.rect.y < 350 and not is_jump:
-             dino.rect.y += 5
+             dino.rect.y += 8
 
         # Оновлення анімації динозавра
         if not is_jump:
@@ -96,17 +120,27 @@ while game:
                 dino.do_animate()
                 start_time = t.time()
 
+        score+=0.1
+        if score > hight_score:
+            hight_score = score
+
         dino.reset(window)
 
-        cactus.rect.x -= 8
-        cactus.reset(window)
-        #cactus.draw_rect()
-        #dino.draw_rect()
-        if cactus.rect.x < -80:
-            cactus.rect.x = 900
+        for cactus in cactuses:
+            cactus.rect.x -= 8
+            cactus.reset(window)
+            if cactus.rect.x < -40:
+                cactus.rect.x = random.randint(900, 1400)
+            if cactus.rect.colliderect(dino):
+                finish = True
 
-    if cactus.rect.colliderect(dino.rect):
-        finish = True
+    if finish:
+        dino = GameSprite(['img/dino_game_over.png'], dino.rect.x, dino.rect.y, 100, 100)
+        dino.reset(window)
+        font2 = font.Font('NFPixels-Regular.otf', 60)
+        text_lose = font2.render('Game over!', True, (0, 0, 0))
+        window.blit(text_lose, (250, 150))
+        window.blit(img_reset, (350, 250))
 
     display.update()
     clock.tick(60)

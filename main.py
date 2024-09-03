@@ -34,8 +34,8 @@ class Enemy(GameSprite):
 img_reset = transform.scale(image.load('img/reset.png'), (80, 50))
 
 cactuses = list()
-cactus_l = Enemy(['img/cactus.png'], random.randint(900, 1090), 360, 60, 80)
-cactus_b = Enemy(['img/cactus_big.png'], random.randint(1100, 1300), 340, 70, 100)
+cactus_l = Enemy(['img/cactus.png'], random.randint(1200, 1600), 360, 60, 80)
+cactus_b = Enemy(['img/cactus_big.png'], random.randint(1650, 2300), 340, 70, 100)
 cactuses.append(cactus_l)
 cactuses.append(cactus_b)
 
@@ -74,14 +74,14 @@ while game:
         if e.type == QUIT:
             game = False
         if e.type == KEYDOWN:
-            if e.key == K_SPACE and not is_jump:
+            if e.key == K_SPACE and not is_jump and dino.rect.y == 350:
                 is_jump = True
                 start_jump = t.time()
         if e.type == MOUSEBUTTONDOWN and finish:
             score = 0
             cactuses = list()
-            cactus_l = Enemy(['img/cactus.png'], random.randint(900, 1090), 360, 60, 80)
-            cactus_b = Enemy(['img/cactus_big.png'], random.randint(1100, 1300), 340, 70, 100)
+            cactus_l = Enemy(['img/cactus.png'], random.randint(1200, 1600), 360, 60, 80)
+            cactus_b = Enemy(['img/cactus_big.png'], random.randint(1650, 2300), 340, 70, 100)
             cactuses.append(cactus_l)
             cactuses.append(cactus_b)
             dino = GameSprite(dino_frames, 100, 350, 100, 100)
@@ -89,7 +89,7 @@ while game:
 
     if not finish:
         text = font1.render(f'HI{int(hight_score)} {int(score)}', True, (0, 0, 0))
-        window.fill((250, 250, 250))
+        window.fill((255, 255, 255))
         window.blit(text, (630, 40))
         floor1_rect.x -= 8
         floor2_rect.x -= 8
@@ -104,15 +104,14 @@ while game:
         if floor3_rect.x < -550:
             floor3_rect.x = 800
 
-        if is_jump:
-            dino.rect.y -= 8
         new_time = t.time()
 
-        if new_time - start_jump > 0.5:
+        if is_jump:
+             dino.rect.y -= 8
+        if dino.rect.y < 100:
             is_jump = False
-
         if dino.rect.y < 350 and not is_jump:
-             dino.rect.y += 8
+            dino.rect.y += 8
 
         # Оновлення анімації динозавра
         if not is_jump:
